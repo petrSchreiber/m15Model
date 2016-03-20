@@ -1,2 +1,2 @@
 # m15Model
-thinBasic units for handling m15 model files
+thinBasic solution for m15 3D model management
