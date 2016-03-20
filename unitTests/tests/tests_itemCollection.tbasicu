@@ -1,0 +1,39 @@
+#INCLUDE "..\..\m15Model\itemCollection.tBasicU"
+
+Function test_AddItem_TwoAdded_TwoStored()  
+  Dim subject As itemCollection
+  
+  subject.AddItem("First")  
+  subject.AddItem("Second")  
+  
+  ut_assertEqual(2, subject.GetItemsCount)
+End Function
+
+Function test_GetItem_TwoAdded_TwoRetrieveable()  
+  Dim subject As itemCollection
+  
+  subject.AddItem("First")  
+  subject.AddItem("Second")  
+  
+  ut_assertEqualText("First", subject.GetItem(1))
+  ut_assertEqualText("Second", subject.GetItem(2))  
+End Function
+
+Function test_GetItems_TwoAdded_AllRetrieveable()  
+  Dim subject As itemCollection
+  
+  subject.AddItem("First")  
+  subject.AddItem("Second")  
+  
+  ut_assertEqualText("First,Second", subject.GetItems(","))
+End Function
+
+Function test_AddItem_TwoAddedAndCleared_NoneStored()  
+  Dim subject As itemCollection
+  
+  subject.AddItem("First")  
+  subject.AddItem("Second")                     
+  subject.ClearItems
+  
+  ut_assertEqual(0, subject.GetItemsCount)
+End Function

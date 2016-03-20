@@ -1,0 +1,5 @@
+'[] Project wide logger
+
+#INCLUDE Once "chronicler.tBasicU"
+
+Dim logger As Chronicler(APP_SourcePath + "log.txt")

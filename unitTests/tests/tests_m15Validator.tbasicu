@@ -1,0 +1,89 @@
+#INCLUDE "..\..\m15Model\m15Validator.tBasicU"
+
+$m15_ValidContent = "'thinEdge datafile {1.0.0.7}
+VERTEXNUM,3
+POLY,-1,0,0,0,1,0,0,255,0,0,0,0,0,1
+POLY,1,0,0,0,1,0,0,0,255,0,0,0,0,1
+POLY,0,1,0,1,1,0,0,0,0,255,0,0,0,1"
+
+$m15_FileName = APP_SourcePath + "model.m15"
+
+Function test_IsValidFile_NotExisting_False()  
+  Dim subject As m15Validator
+  Long result = subject.IsValidFile("C:\Not\Directory\norFile.m15")
+  
+  ut_assertIsFalse(result)  
+End Function
+            
+Function test_Errors_NotExisting_CorrectMessage()  
+  Dim subject As m15Validator
+  subject.IsValidFile("C:\Not\Directory\norFile.m15")
+  
+  ut_assertEqualText("File doesn't exist: C:\Not\Directory\norFile.m15", subject.GetErrors)  
+End Function
+
+Function test_IsValidFile_NotM15File_False()  
+  Dim subject As m15Validator
+  Long result = subject.IsValidFile(APP_ScriptFullName)
+  
+  ut_assertIsFalse(result)  
+End Function
+            
+Function test_Errors_NotM15File_CorrectMessage()  
+  Dim subject As m15Validator
+  subject.IsValidFile(APP_ScriptFullName)
+  
+  ut_assertEqualText("The content is not valid m15 v1.0.0.7", subject.GetErrors)  
+End Function
+
+Function test_IsValidFile_ValidFile_True()  
+  Dim subject As m15Validator     
+  FILE_Save($m15_FileName, $m15_ValidContent)
+  
+  Long result = subject.IsValidFile($m15_FileName)
+  
+  ut_assertIsTrue(result)  
+  
+  FILE_Kill($m15_FileName)
+End Function
+            
+Function test_Errors_ValidFile_Empty()  
+  Dim subject As m15Validator
+  FILE_Save($m15_FileName, $m15_ValidContent)
+  
+  Long result = subject.IsValidFile($m15_FileName)
+                            
+  ut_assertEqualText("", subject.GetErrors)  
+  
+  FILE_Kill($m15_FileName)
+End Function
+
+Function test_IsValidContent_OldVersion_False()  
+  Dim subject As m15Validator
+  Long result = subject.IsValidContent(Replace$($m15_ValidContent, "{1.0.0.7}", "{1.0.0.6}"))
+  
+  ut_assertIsFalse(result)  
+End Function
+            
+Function test_Errors_OldVersion_CorrectMessage()  
+  Dim subject As m15Validator
+  subject.IsValidContent(Replace$($m15_ValidContent, "{1.0.0.7}", "{1.0.0.6}"))
+  
+  ut_assertEqualText("The content is not valid m15 v1.0.0.7", subject.GetErrors)  
+End Function
+
+Function test_IsValidContent_ValidContent_True()  
+  Dim subject As m15Validator     
+  
+  Long result = subject.IsValidContent($m15_ValidContent)
+  
+  ut_assertIsTrue(result)    
+End Function
+            
+Function test_Errors_ValidContent_Empty()  
+  Dim subject As m15Validator
+  
+  Long result = subject.IsValidContent($m15_ValidContent)
+                            
+  ut_assertEqualText("", subject.GetErrors)
+End Function

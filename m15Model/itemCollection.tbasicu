@@ -1,0 +1,51 @@
+'[] Collection for small string data items
+
+Type ItemCollection
+  items()  As String
+  count     As Long
+  capacity  As Long
+  
+  Public
+    Function _Create(Optional capacity As Long = 1)      
+      Me.count = 0
+      Me.capacity = capacity
+      
+      ReDim Me.items(Me.capacity)
+    End Function
+                
+    Function ClearItems()
+      Me._Create()
+    End Function
+    
+    Function AddItem(item As String)
+      Incr Me.count         
+      
+      If Me.count > Me.capacity Then
+        Me.capacity *= 2
+        ReDim Preserve Me.items(Me.capacity)        
+      End If
+      
+      Me.items(Me.count) = item
+    End Function                            
+    
+    Function GetItems(separator As String) As String
+      String result
+      Long   i
+      
+      For i = 1 To Me.count
+        result += Me.items(i) + separator
+      Next                               
+      
+      Return RTrim$(result, separator)
+    End Function
+    
+    Function GetItemsCount() As String
+      Return Me.count
+    End Function
+    
+    Function GetItem(index As Long) As String
+      If Between(index, 1, Me.count) Then
+        Return Me.items(index)
+      End If  
+    End Function    
+End Type

@@ -1,0 +1,86 @@
+#INCLUDE "..\..\m15Model\chronicler.tBasicU"
+
+$chronicler_file = APP_SourcePath + "chronicler.txt"
+
+Function test_Init_PurgeSpecified_FileRestarted()
+  FILE_Save($chronicler_file, "temp")              
+  Dim subject As chronicler($chronicler_file, TRUE)
+  
+  ut_assertIsTrue(FILE_Size($chronicler_file) <> 4)  
+  
+  chronicler_test_teardown
+End Function
+
+Function test_Init_PurgeOff_FileNotHurt()
+  FILE_Save($chronicler_file, "temp")      
+  Dim subject As chronicler($chronicler_file)
+  
+  String content = FILE_Load($chronicler_file)
+  ut_assertIsTrue(StartsWith(content, "temp"))  
+  
+  chronicler_test_teardown
+End Function
+
+Function test_Note_MessageSpecified_ContainsDate()      
+  Dim subject As chronicler($chronicler_file, TRUE)
+  
+  subject.Note(%Chronicler_Debug, "Unit test", "There are so many doors to open. I am impatient to begin.")
+  
+  String content = FILE_Load($chronicler_file)
+  String dateField = Parse$(content, " ", 1) 
+  ut_assertIsTrue(Tally(dateField, "-") = 2)
+  
+  chronicler_test_teardown
+End Function
+
+Function test_Note_MessageSpecified_ContainsTime()      
+  Dim subject As chronicler($chronicler_file, TRUE)
+  
+  subject.Note(%Chronicler_Debug, "Unit test", "There are so many doors to open. I am impatient to begin.")
+  
+  String content = FILE_Load($chronicler_file)
+  String timeField = Parse$(content, " ", 2) 
+  ut_assertIsTrue(Tally(timeField, ":") = 2)
+  
+  chronicler_test_teardown
+End Function
+
+Function test_Note_MessageSpecified_ContainsSeverity()      
+  Dim subject As chronicler($chronicler_file, TRUE)
+  
+  subject.Note(%Chronicler_Debug, "Unit test", "There are so many doors to open. I am impatient to begin.")
+  
+  String content = FILE_Load($chronicler_file)
+  String severity = Grab$(content, "(", ")")
+  ut_assertIsTrue(severity = "DEBUG")
+  
+  chronicler_test_teardown
+End Function
+
+Function test_Note_MessageSpecified_ContainsContext()      
+  Dim subject As chronicler($chronicler_file, TRUE)
+  
+  subject.Note(%Chronicler_Debug, "Unit test", "There are so many doors to open. I am impatient to begin.")
+  
+  String content = FILE_Load($chronicler_file)
+  String context = Grab$(content, "[", "]")   
+  ut_assertIsTrue(context = "Unit test")
+  
+  chronicler_test_teardown
+End Function
+
+Function test_Note_MessageSpecified_ContainsMessage()      
+  Dim subject As chronicler($chronicler_file, TRUE)
+  
+  subject.Note(%Chronicler_Debug, "Unit test", "There are so many doors to open. I am impatient to begin.")
+  
+  String content = FILE_Load($chronicler_file)
+  String message = RTrim$(Remain$(content, "] "), $CRLF)
+  ut_assertIsTrue(message = "There are so many doors to open. I am impatient to begin.")
+  
+  chronicler_test_teardown
+End Function                                                                            
+
+Function chronicler_test_teardown()
+  FILE_Kill($chronicler_file)
+End Function

@@ -1,0 +1,39 @@
+'[] Validator for M15 files
+
+#MINVERSION 1.9.16.16
+
+#INCLUDE Once "loggingSupport.tBasicU"
+#INCLUDE Once "itemCollection.tBasicU"
+
+Type m15Validator  
+  Private
+    content As String
+    errors  As itemCollection
+    
+  Public
+    Function IsValidFile(fileName As String)      
+      Me.errors.ClearItems
+      
+      If Not FILE_Exists(fileName) Then
+        Me.errors.AddItem("File doesn't exist: " + fileName)
+        Return FALSE
+      End If        
+      
+      Return Me.IsValidContent(FILE_Load(fileName)) 
+    End Function
+    
+    Function IsValidContent(content As String)
+      Me.errors.ClearItems
+                               
+      If Not StartsWith(content, "'thinEdge datafile {1.0.0.7}" + $CRLF + "VERTEXNUM") Then
+        Me.errors.AddItem("The content is not valid m15 v1.0.0.7")
+        Return FALSE
+      End If              
+      
+      Return TRUE
+    End Function  
+    
+    Function GetErrors() As String
+      Return Me.errors.GetItems()
+    End Function
+End Type
