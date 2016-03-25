@@ -1,0 +1,104 @@
+'[] Builder for GBuffer   
+
+Uses "TBGL"
+
+Type gBufferBuilder
+  Private
+    lastIndex As Long 
+    capacity  As Long
+    gBuffer   As DWord
+    
+  Public                            
+    pVertices As DWord
+    pColors   As DWord
+    pNormals  As DWord
+    pUvs      As DWord
+    
+  Function _Create(Optional initialSize As Long = 1024)
+    Me.capacity = initialSize
+    
+    Me.pVertices = HEAP_Alloc(Me.capacity * SizeOf(TBGL_TVECTOR3F))
+    Me.pColors   = HEAP_Alloc(Me.capacity * SizeOf(TBGL_TRGB))
+    Me.pNormals  = HEAP_Alloc(Me.capacity * SizeOf(TBGL_TVECTOR3F))
+    Me.pUvs      = HEAP_Alloc(Me.capacity * SizeOf(TBGL_TVECTOR2F))
+    
+    Me.lastIndex = 0
+  End Function
+  
+  Function _Destroy()
+    HEAP_Free(Me.pVertices)
+    HEAP_Free(Me.pColors)
+    HEAP_Free(Me.pNormals)
+    HEAP_Free(Me.pUvs)
+  End Function      
+
+  Function AddItem() As Long
+    Incr Me.lastIndex
+    
+    If Me.lastIndex > Me.capacity Then
+      Me.capacity *= 2
+      
+      Me.pVertices = HEAP_Realloc(Me.pVertices, Me.capacity * SizeOf(TBGL_TVECTOR3F))
+      Me.pColors   = HEAP_Realloc(Me.pColors,   Me.capacity * SizeOf(TBGL_TRGB))
+      Me.pNormals  = HEAP_Realloc(Me.pNormals,  Me.capacity * SizeOf(TBGL_TVECTOR3F))
+      Me.pUvs      = HEAP_Realloc(Me.pUvs,      Me.capacity * SizeOf(TBGL_TVECTOR2F))
+    End If 
+  End Function
+  
+  Function SetVertex(x As Single, y As Single, z As Single)
+    Dim vertices(Me.lastIndex) As TBGL_TVECTOR3F At Me.pVertices
+    With vertices(Me.lastIndex)
+      .x = x
+      .y = y
+      .z = z
+    End With  
+  End Function
+  
+  Function SetColor(r As Byte, g As Byte, b As Byte)
+    Dim colors(Me.lastIndex) As TBGL_TRGB At Me.pColors
+    With colors(Me.lastIndex)
+      .r = r
+      .g = g
+      .b = b
+    End With  
+  End Function
+  
+  Function SetNormal(x As Single, y As Single, z As Single)
+    Dim normals(Me.lastIndex) As TBGL_TVECTOR3F At Me.pNormals
+    With normals(Me.lastIndex)
+      .x = x
+      .y = y
+      .z = z
+    End With  
+  End Function
+  
+  Function SetUV(x As Single, y As Single)
+    Dim uvs(Me.lastIndex) As TBGL_TVECTOR2F At Me.pUvs
+    With uvs(Me.lastIndex)
+      .x = x
+      .y = y
+    End With  
+  End Function       
+  
+  Function Build(primitive As Long) As Long
+    Dim firstVertex As TBGL_TVECTOR3F At Me.pVertices
+    Dim firstColor  As TBGL_TRGB      At Me.pColors
+    Dim firstNormal As TBGL_TVECTOR3F At Me.pNormals
+    Dim firstUV     As TBGL_TVECTOR3F At Me.pUvs
+                                                              
+    Me.gBuffer = TBGL_GBufferCreate(primitive, %TBGL_3D)
+    TBGL_GBufferDefineFromArray(Me.gBuffer,
+                                %TBGL_STATIC,
+                                Me.lastIndex,
+                                firstVertex,
+                                firstColor,
+                                firstNormal,
+                                firstUv)
+  End Function
+  
+  Function Render()
+    If Me.gBuffer Then
+      TBGL_GBufferRender(Me.gBuffer)
+    End If
+  End Function
+End Type
