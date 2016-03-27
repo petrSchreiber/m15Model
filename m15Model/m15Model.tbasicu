@@ -35,7 +35,7 @@ Type m15Model
     Function Render()
       Long i 
       Long count = Me.chunkParser.chunks.GetCount() 
-                 PrintL count
+ 
       For i = 1 To count
         TBGL_GBufferRender Me.chunkParser.chunks.GetGBuffer(i)
       Next
