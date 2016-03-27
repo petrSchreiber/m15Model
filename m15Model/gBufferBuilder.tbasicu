@@ -30,6 +30,11 @@ Type gBufferBuilder
     HEAP_Free(Me.pColors)
     HEAP_Free(Me.pNormals)
     HEAP_Free(Me.pUvs)
+  End Function
+  
+  Function ClearItems(Optional initialSize As Long = 1024)     
+    Me._Destroy
+    Me._Create(initialSize)
   End Function      
 
   Function AddItem() As Long
@@ -51,7 +56,7 @@ Type gBufferBuilder
       .x = x
       .y = y
       .z = z
-    End With  
+    End With 
   End Function
   
   Function SetColor(r As Byte, g As Byte, b As Byte)
@@ -94,11 +99,11 @@ Type gBufferBuilder
                                 firstColor,
                                 firstNormal,
                                 firstUv)
-  End Function
+                                
+    Return Me.gBuffer                                
+  End Function 
   
-  Function Render()
-    If Me.gBuffer Then
-      TBGL_GBufferRender(Me.gBuffer)
-    End If
+  Function GetGBuffer()
+    Return Me.gBuffer
   End Function
 End Type
