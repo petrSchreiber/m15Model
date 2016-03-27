@@ -1,5 +1,5 @@
 '[] Project wide logger
 
-#INCLUDE Once "chronicler.tBasicU"
+#INCLUDE Once "Log007.tBasicU"
 
-Dim logger As Chronicler(APP_SourcePath + "log.txt")
+Dim logger As Log007(APP_SourcePath + "log.txt")

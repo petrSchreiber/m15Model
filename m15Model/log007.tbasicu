@@ -1,0 +1,64 @@
+'[] Lightweight logger with license to kill
+
+Uses "File"
+
+Type Log007
+  Private
+    fileName  As String
+    
+    lastError As String
+    
+    Function LevelOf(severity As String) As Long
+      String severities(5) = "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
+
+      Return Array Scan severities(), Collate Ucase, =severity
+    End Function
+    
+    Function ReportFatal(context As String, message As String) 
+      MsgBox 0,
+             StrFormat$("Fatal error has occured, program will be aborted.{1}{2}", $CRLF(2), message),
+             %MB_ICONERROR | %MB_OK,
+             context
+      Stop
+    End Function                                        
+    
+  Public
+    Function _Create(fileName As String, Optional purge As Long = FALSE)
+      Me.fileName = fileName                               
+      
+      If purge Then FILE_Kill(Me.fileName)
+    End Function
+    
+    Function Note(severity As String, context As String, message As String)
+      message = Replace$(message, $CR, "$CR")
+      message = Replace$(message, $LF, "$LF")     
+      
+      severity = Ucase$(severity)                               
+      
+      String logLine = StrFormat$("{1} {2} ({3}) [{4}] {5}",
+                         Date$,
+                         Time$,
+                         severity,
+                         context,
+                         message)
+      
+      FILE_Append(Me.fileName, logLine + $CRLF)  
+                             
+      Select Case Me.LevelOf(severity)
+        Case Me.LevelOf("error")          
+          Me.lastError = logLine
+      
+        Case > Me.LevelOf("error")
+          Me.ReportFatal(context, message)        
+        
+      End Select
+    End Function
+    
+    Function InTrouble() As Long
+      Return Len(Me.lastError)
+    End Function
+    
+    Function LastTrouble() As String
+      Return Me.lastError
+    End Function
+End Type
