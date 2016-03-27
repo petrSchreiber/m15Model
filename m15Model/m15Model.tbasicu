@@ -1,0 +1,44 @@
+'[] m15 model manipulation
+
+#MINVERSION 1.9.16.16
+
+#INCLUDE Once "loggingSupport.tBasicU"
+#INCLUDE Once "m15ModelChunkParser.tBasicU"
+#INCLUDE Once "m15Validator.tBasicU"
+
+Uses "TBGL"
+
+Type m15Model
+  Private    
+    chunkParser As m15ModelChunkParser
+    
+  Public                    
+
+    Function FromFile(fileName As String)           
+      Dim validator As m15Validator
+      If Not validator.IsValidFile(fileName) Then
+        logger.Note("fatal", Function_Name, validator.GetErrors)
+      End If
+      
+      Me.FromMemory(FILE_Load(fileName))      
+    End Function                   
+    
+    Function FromMemory(content As String)
+      Dim validator As m15Validator
+      If Not validator.IsValidContent(content) Then
+        logger.Note("fatal", Function_Name, validator.GetErrors)
+      End If    
+      
+      Me.chunkParser.Process(content)
+    End Function
+    
+    Function Render()
+      Long i 
+      Long count = Me.chunkParser.chunks.GetCount() 
+                 PrintL count
+      For i = 1 To count
+        TBGL_GBufferRender Me.chunkParser.chunks.GetGBuffer(i)
+      Next
+    End Function
+
+End Type

@@ -2,7 +2,6 @@
 
 #MINVERSION 1.9.16.16
 
-#INCLUDE Once "loggingSupport.tBasicU"
 #INCLUDE Once "itemCollection.tBasicU"
 
 Type m15Validator  

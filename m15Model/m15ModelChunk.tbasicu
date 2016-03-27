@@ -1,0 +1,6 @@
+'[] Model sub part representation
+
+Type m15ModelChunk
+  gBuffer As DWord
+  texture As DWord
+End Type

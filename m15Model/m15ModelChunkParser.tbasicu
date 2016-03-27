@@ -1,0 +1,87 @@
+'[] Parsing of m15ModelChunks from string buffer
+
+#INCLUDE Once "m15ModelChunkCollection.tbasicu"
+#INCLUDE Once "gBufferBuilder.tbasicu"
+
+Begin Const
+  %m15_X = 1, %m15_Y, %m15_Z 
+  %m15_PStop 
+  %m15_Texture, %m15_U, %m15_V 
+  %m15_R, %m15_G, %m15_B 
+  %m15_NX, %m15_NY, %m15_NZ
+End Const
+
+Type m15ModelChunkParser
+  
+  Private
+ 
+    Function VertexCount2GBufferType(vertexCount As Long) As Long
+      If vertexCount > 4 Then
+        Return %TBGL_POLYGON
+      Else
+        Return Choose(vertexCount, %TBGL_POINTS, %TBGL_LINES, %TBGL_TRIANGLES, %TBGL_QUADS)
+      End If
+    End Function
+  
+    Function GetVertexCount(lines() As String, fromIndex As Long) As Long
+      Long i
+      Long count
+      
+      For i = fromIndex To UBound(lines)
+        Incr count
+        If lines(i, %m15_PStop) = "1" Then
+          Return count
+        End If
+      Next
+    End Function 
+    
+    Function IsNextPolygonOfSameType(lines() As String, fromIndex As Long, vertexCount As Long) As Long
+      If fromIndex + 1 > CountOf(lines) Then
+        Return FALSE
+      Else
+        Decr vertexCount
+        Return lines(fromIndex, %m15_Texture) = lines(fromIndex+1, %m15_Texture) And lines(fromIndex+vertexCount, %m15_PStop) = "1"
+      End If
+    End Function 
+  
+  Public
+    chunks  As m15ModelChunkCollection
+    
+    Function Process(content As String) As DWord
+      Me.chunks.ClearItems()
+      Dim builder As gBufferBuilder()
+                 
+      String definition = Mid$(content, InStr(content, "POLY"))
+      definition = Trim$(Remove$(definition, "POLY,"))
+           
+      String lines()
+      Long   count = Parse(definition, lines, $CRLF, ",")
+      Long   i, j
+                     
+      Long lastPStop   = lines(1, %m15_PStop)
+      Long lastTexture = lines(1, %m15_Texture)
+      Long polygonVertexCount = Me.GetVertexCount(lines, 1)
+                                                   
+      For i = 1 To count
+        builder.AddItem()
+          builder.SetVertex(lines(i, %m15_X), lines(i, %m15_Y), lines(i, %m15_Z))
+          builder.SetColor(lines(i, %m15_R), lines(i, %m15_G), lines(i, %m15_B))
+          builder.SetNormal(lines(i, %m15_NX), lines(i, %m15_NY), lines(i, %m15_NZ))
+          builder.SetUV(lines(i, %m15_U), lines(i, %m15_V))
+        
+        If lines(i, %m15_PStop) = "1" Then
+          If Me.IsNextPolygonOfSameType(lines, i+1, polygonVertexCount) = FALSE Or polygonVertexCount > 4 Then
+            builder.Build(Me.VertexCount2GBufferType(polygonVertexCount))
+            Me.chunks.AddItem(builder.GetGBuffer,
+                              lastTexture)
+            
+            If i < count Then
+              builder.ClearItems()
+              lastTexture = lines(i+1, %m15_Texture)        
+              polygonVertexCount = Me.GetVertexCount(lines, i+1)
+            End If             
+          End If
+        End If
+      Next      
+    End Function
+End Type

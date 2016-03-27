@@ -1,0 +1,51 @@
+#INCLUDE Once "loggingSupport.tBasicU"
+#INCLUDE Once "m15ModelChunk.tbasicu"
+
+Type m15ModelChunkCollection
+  Private
+    capacity As Long
+    count    As Long
+    pData    As DWord
+    
+  Public
+    Function _Create(Optional initialSize As Long = 8)
+      Me.capacity = initialSize 
+      Me.pData = HEAP_Alloc(Me.capacity * SizeOf(m15ModelChunk))
+    End Function
+    
+    Function _Destroy()
+      HEAP_Free(Me.pData)
+    End Function
+    
+    Function ClearItems(Optional intialSize As Long = 8)
+      Me._Destroy
+      Me._Create(intialSize)
+    End Function
+    
+    Function AddItem(gBuffer As DWord, texture As DWord)
+      Incr Me.count
+      If Me.count > Me.capacity Then
+        Me.capacity *= 2
+        Me.pData = HEAP_Realloc(Me.pData, Me.capacity * SizeOf(m15ModelChunk))
+      End If                                                    
+
+      Dim item As m15ModelChunk At Me.pData + (Me.count-1) * SizeOf(m15ModelChunk)
+      item.gBuffer = gBuffer
+      item.texture = texture
+    End Function
+    
+    Function GetGBuffer(index As Long) As DWord
+      If Outside(index, 1, Me.count) Then
+        logger.Note(%Chronicler_Fatal, "m15ModelChunkCollection:GetGBuffer",
+                                       StrFormat$("Index {1} out of bounds [1,{2}]", index, Me.count)
+      End If
+      
+      Dim item As m15ModelChunk At Me.pData + (index-1) * SizeOf(m15ModelChunk)
+      
+      Return item.gBuffer
+    End Function
+    
+    Function GetCount()
+      Return Me.count
+    End Function
+End Type
