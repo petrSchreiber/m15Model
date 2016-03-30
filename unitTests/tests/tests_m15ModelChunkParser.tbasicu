@@ -1,0 +1,67 @@
+#INCLUDE "..\..\m15Model\m15ModelChunkParser.tBasicU"
+
+$m15_ContentWith1Triangle = "'thinEdge datafile {1.0.0.7}
+VERTEXNUM,7
+POLY,-1,0,0,0,1,0,0,255,0,0,0,0,0,1
+POLY,1,0,0,0,1,0,0,0,255,0,0,0,0,1
+POLY,0,1,0,1,1,0,0,0,0,255,0,0,0,1
+"
+
+$m15_ContentWith2Triangles = "'thinEdge datafile {1.0.0.7}
+VERTEXNUM,7
+POLY,-1,0,0,0,1,0,0,255,0,0,0,0,0,1
+POLY,1,0,0,0,1,0,0,0,255,0,0,0,0,1
+POLY,0,1,0,1,1,0,0,0,0,255,0,0,0,1
+POLY,-1,0,1,0,1,0,0,255,0,0,0,0,0,1
+POLY,1,0,1,0,1,0,0,0,255,0,0,0,0,1
+POLY,0,1,1,1,1,0,0,0,0,255,0,0,0,1
+"
+
+$m15_ContentWith2TrianglesWithDifferentTexture = "'thinEdge datafile {1.0.0.7}
+VERTEXNUM,7
+POLY,-1,0,0,0,1,0,0,255,0,0,0,0,0,1
+POLY,1,0,0,0,1,0,0,0,255,0,0,0,0,1
+POLY,0,1,0,1,1,0,0,0,0,255,0,0,0,1
+POLY,-1,0,1,0,2,0,0,255,0,0,0,0,0,1
+POLY,1,0,1,0,2,0,0,0,255,0,0,0,0,1
+POLY,0,1,1,1,2,0,0,0,0,255,0,0,0,1
+"
+
+$m15_ContentWith1Triangle1Quad = "'thinEdge datafile {1.0.0.7}
+VERTEXNUM,7
+POLY,-1,0,0,0,1,0,0,255,0,0,0,0,0,1
+POLY,1,0,0,0,1,0,0,0,255,0,0,0,0,1
+POLY,0,1,0,1,1,0,0,0,0,255,0,0,0,1
+POLY,-1,-1,0,0,1,0,0,0,0,255,0,0,0,1
+POLY,1,-1,0,0,1,0,0,0,0,255,0,0,0,1
+POLY,1,1,0,0,1,0,0,0,0,255,0,0,0,1
+POLY,-1,1,0,1,1,0,0,0,0,255,0,0,0,1
+"
+
+'Function test_Process_1Tri_OneChunk()  
+'  Dim subject As m15ModelChunkParser
+'  Long result = subject.Process($m15_ContentWith1Triangle)
+'                  
+'  ut_assertIsTrue(result = 1)
+'End Function
+'
+'Function test_Process_2Tris_OneChunk()  
+'  Dim subject As m15ModelChunkParser
+'  Long result = subject.Process($m15_ContentWith2Triangles)
+'                  
+'  ut_assertIsTrue(result = 1)
+'End Function
+
+Function test_Process_2DifferentTris_TwoChunks()  
+  Dim subject As m15ModelChunkParser
+  Long result = subject.Process($m15_ContentWith2TrianglesWithDifferentTexture)
+                  
+  ut_assertIsTrue(result = 2)
+End Function
+'
+'Function test_Process_1Tri1Quad_TwoChunks()  
+'  Dim subject As m15ModelChunkParser
+'  Long result = subject.Process($m15_ContentWith1Triangle1Quad)
+'                  
+'  ut_assertIsTrue(result = 2)
+'End Function

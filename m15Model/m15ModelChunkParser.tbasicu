@@ -60,8 +60,11 @@ Type m15ModelChunkParser
                      
       Long lastPStop   = lines(1, %m15_PStop)
       Long lastTexture = lines(1, %m15_Texture)
+      Long newTexture
       Long polygonVertexCount = Me.GetVertexCount(lines, 1)
-                                                   
+      
+      If Len(lines(count, %m15_X)) = 0 Then Decr count
+                                             
       For i = 1 To count
         builder.AddItem()
           builder.SetVertex(lines(i, %m15_X), lines(i, %m15_Y), lines(i, %m15_Z))
@@ -70,18 +73,22 @@ Type m15ModelChunkParser
           builder.SetUV(lines(i, %m15_U), lines(i, %m15_V))
         
         If lines(i, %m15_PStop) = "1" Then
-          If Me.IsNextPolygonOfSameType(lines, i+1, polygonVertexCount) = FALSE Or polygonVertexCount > 4 Then
+          newTexture = IIf(i < count, lines(i+1, %m15_Texture), lastTexture)
+          
+          If polygonVertexCount > 4 Or Me.IsNextPolygonOfSameType(lines, i+1, polygonVertexCount) = FALSE Or newTexture <> lastTexture Then
             builder.Build(Me.VertexCount2GBufferType(polygonVertexCount))
             Me.chunks.AddItem(builder.GetGBuffer,
                               lastTexture)
             
             If i < count Then
               builder.ClearItems()
-              lastTexture = lines(i+1, %m15_Texture)        
+              lastTexture = newTexture
               polygonVertexCount = Me.GetVertexCount(lines, i+1)
             End If             
           End If
         End If
       Next      
+      
+      Function = Me.chunks.GetCount()
     End Function
 End Type
